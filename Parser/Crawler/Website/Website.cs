@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Parser
 {
-    public class Website 
+    public abstract class Website 
     {
 
         private readonly HttpClient httpClient;

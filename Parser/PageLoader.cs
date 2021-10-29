@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
@@ -19,6 +20,8 @@ namespace Parser
             }
             catch
             {
+                Console.WriteLine("Ошибка при загрузке");
+                Debug.Print("Ошибка при загрузке");
                 result = new HttpResponseMessage();
                 result.StatusCode = System.Net.HttpStatusCode.BadRequest;
             }

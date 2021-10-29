@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Parser
+namespace DBLayer
 {
-    public interface ICrawlable
+    public interface IDBContext
     {
-        public IAsyncEnumerable<Event> CrawlAsync();
+
     }
 }
