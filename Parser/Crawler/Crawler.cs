@@ -11,11 +11,9 @@ namespace Parser
 {
     public class Crawler
     {
-        readonly HttpClient httpClient;
         Dictionary<CrawlableSource, List<Event>> events;
-        public Crawler(HttpClient httpClient)
+        public Crawler()
         {
-            this.httpClient = httpClient;
             events = new Dictionary<CrawlableSource, List<Event>>();
         }
 

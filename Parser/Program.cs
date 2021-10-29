@@ -239,7 +239,7 @@ namespace Parser
             
             var startTime = DateTime.Now;
 
-            var crawler = new Crawler(httpClient);
+            var crawler = new Crawler();
             var counter = 1;
             await foreach (var e in crawler.StartAsync(sourceList))
             {
