@@ -10,35 +10,41 @@ namespace Parser
 {
     public class Event
     {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
         public Event()
         {
-            DateOfDownload = DateTime.Now;
-            Hash = GetHashCode();
+
         }
+        [Key]
+        public string Link { get; set; }
         public Source Source { get; set; }
+        public string Title { get; set; }
+        public string IncidentCategory {get;set;}
         public string Body { get; set; }
         public string Date { get; set; }
-        public DateTime DateOfDownload { get; }
-        public string Address { get; set; }
-        public string Link { get; set; }
-        public int Hash { get; }
+        public DateTime DateOfDownload { get; set; }
+
+        [Column(TypeName = "jsonb")]
+        public Address Address { get; set; }
+
+        [Column(TypeName = "jsonb")]
+        public HashSet<string> Hash { get; }
 
         public override int GetHashCode()
         {
-            return base.GetHashCode();
+            return Link.GetHashCode();
         }
 
         public override bool Equals(object obj)
         {
-            return base.Equals(obj);
+            if (!(obj is Event))
+                return false;
+            
+            return ((Event)obj).Link.Equals(Link);
         }
 
         public override string ToString()
         {
-            return $"{Id}\n{Link}\n{Body}";
+            return $"{Link}\n{Body}";
         }
     }
 }

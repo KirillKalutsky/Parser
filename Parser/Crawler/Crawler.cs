@@ -1,4 +1,5 @@
 ﻿using HtmlAgilityPack;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -11,79 +12,96 @@ namespace Parser
 {
     public class Crawler
     {
-        Dictionary<CrawlableSource, List<Event>> events;
         public Crawler()
         {
-            events = new Dictionary<CrawlableSource, List<Event>>();
         }
 
-        public async IAsyncEnumerable<Event> StartAsync(IEnumerable<CrawlableSource> sourcers)
+        private CrawlableSource GetCrawlableSourceFromSource(Source s)
+        {
+            CrawlableSource crawbleSource;
+            switch (s.SourceType)
+            {
+                case SourceType.PageSite:
+                    var pageSite = JsonConvert.DeserializeObject<PageArchitectureSite>(s.Fields.Properties);
+                    if(s.Events!=null)
+                        pageSite.LastEvent = s.Events.OrderBy(x => x.DateOfDownload).LastOrDefault();
+                    crawbleSource = pageSite;
+                    break;
+                default:
+                    var site = JsonConvert.DeserializeObject<PageArchitectureSite>(s.Fields.Properties);
+                    site.LastEvent = s.Events.OrderBy(x => x.DateOfDownload).LastOrDefault();
+                    crawbleSource = site;
+                    break;
+            }
+            return crawbleSource;
+        }
+
+        Tuple<List<CrawlableSource>,Dictionary<IAsyncEnumerator<Event>, CrawlableSource>> GetCrawbleSourceEnumerator(List<Source> sourcers)
         {
             var fromCrawbleSourceToEnumerator = new Dictionary<IAsyncEnumerator<Event>, CrawlableSource>();
+            var listSources = new List<CrawlableSource>();
 
-            var newsEnumerators = sourcers.Select(x => 
+            sourcers.ForEach(s => 
             {
-                if (events.ContainsKey(x))
-                    x.LastCrawlableEvent = events[x].LastOrDefault();
-                var enumerator = x.CrawlAsync().GetAsyncEnumerator();
-                fromCrawbleSourceToEnumerator[enumerator] = x;
-                return enumerator;
-                })
-                .ToList();
+                var source = GetCrawlableSourceFromSource(s);
+                listSources.Add(source);
+                var enumerator = source.CrawlAsync(s).GetAsyncEnumerator();
+                fromCrawbleSourceToEnumerator[enumerator] = source;
+            });
+
+            return Tuple.Create(listSources,fromCrawbleSourceToEnumerator);
+        }
+
+        public async IAsyncEnumerable<Event> StartAsync(IEnumerable<Source> sourcers)
+        {
+            var s = GetCrawbleSourceEnumerator(sourcers.ToList());
+            var sourceEnumerators = s.Item2;
 
             var dictionary = new Dictionary<Task<bool>, IAsyncEnumerator<Event>>();
-            var currentEvents = new List<Task<bool>>();
-            var counter = 0;
-            var startTime = DateTime.Now;
 
-            while (newsEnumerators.Any())
+
+            while (sourceEnumerators.Any())
             {
-                foreach (var en in newsEnumerators)
+                foreach (var en in sourceEnumerators.Keys)
                 {
-                    lock (dictionary)
+                    var next = en.MoveNextAsync().AsTask();
+                    var flag = await next;
+                    if (flag)
                     {
-                        var next = en.MoveNextAsync().AsTask();
-                        currentEvents.Add(next);
-                        dictionary[next] = en;
-                    }
-                }
-                while (currentEvents.Any())
-                {
-                    var cur = await Task.WhenAny(currentEvents);
-                    currentEvents.Remove(cur);
-                    IAsyncEnumerator<Event> enumer;
-                    lock (dictionary)
-                    {
-                        enumer = dictionary[cur];
-                        //dictionary.Remove(cur);
-                    }
-                    var resCur = await cur;
-                    if (resCur)
-                    {
-                        var nnn = enumer.Current;
-                        try
-                        {
-                            var key = fromCrawbleSourceToEnumerator[enumer];
-                            if (events.ContainsKey(key))
-                                events[key].Add(nnn);
-                            else
-                                events[key] = new List<Event>() { nnn};
-
-                        }
-                        catch(KeyNotFoundException e)
-                        {
-                            Debug.Print("нет переходного ключа");
-                        }
-                        yield return nnn;
-                        counter++;
+                        var news = en.Current;
+                        yield return news;
                     }
                     else
                     {
-                        newsEnumerators.Remove(enumer);
+                        sourceEnumerators.Remove(en);
                     }
+                    //dictionary[next] = en;
+                    //dictionary.Add(next,en);
                 }
+                /*while (dictionary.Any())
+                {
+                    var cur = await Task.WhenAny(dictionary.Keys);
+                    IAsyncEnumerator<Event> enumer = dictionary[cur];
+
+                    var resCur = await cur;
+                   
+                    if (resCur)
+                    {
+                        var news = enumer.Current;
+                        yield return news;
+                    }
+                    else
+                    {
+                        sourceEnumerators.Remove(enumer);
+                    }
+
+                    dictionary.Remove(cur);
+
+                }*/
             }
+
+            foreach (var sour in s.Item1)
+                Console.WriteLine($"{sour.IsCrawl}");
         }
-       
     }
 }

@@ -8,14 +8,23 @@ namespace Parser
 {
     public abstract class CrawlableSource
     {
-        public abstract IAsyncEnumerable<Event> CrawlAsync();
-        public  bool IsLastLinkToEvent(string url)
-        {   
-            if (LastCrawlableEvent == null) return false;
-            return url.Equals(LastCrawlableEvent.Link);
-        }
-        public Event LastCrawlableEvent { get; set; }
 
-       
+        //главный метод обхода сайта, этот обход должен заканчиваться в определенный момент
+        //сделаю флаг, "Crawl", пока он true то обход продолжается
+        public abstract IAsyncEnumerable<Event> CrawlAsync(Source source);
+
+        //флаг, пока он истина у нас продолжается обход сайта,
+        //его состояние должно меняться в определенный момент, от наследника к наследнику этот момент может быть разным
+        //по логике должен изменяться когда мы натыкаемся на ссылку статьи которая у нас уже есть в базе
+        //но если мы парсим этот источник впервый раз то должна быть другая причина чтобы остановиться, например количество уже распаршенных новостей или дата рассматриваемой новости
+        //
+        public bool IsCrawl { get; protected set; }
+
+        //последний распаршенный элемент с этого источника, если его уже парсили
+        //нужно будет смотреть парсили ли его уже, чтобы не парсить по несколько раз одно и то же
+        public Event LastEvent { get; set; }
+
+        //метод который будет узменять состояние флага, при достижении определенных условий, определяемых в наследнике
+        public abstract bool StopCrawl();
     }
 }

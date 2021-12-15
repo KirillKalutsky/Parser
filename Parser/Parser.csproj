@@ -7,10 +7,13 @@
 
   <ItemGroup>
     <PackageReference Include="HtmlAgilityPack" Version="1.11.37" />
+    <PackageReference Include="IronPython" Version="2.7.11" />
+    <PackageReference Include="LemmaGenerator" Version="1.1.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="5.0.10" />
     <PackageReference Include="Polly" Version="7.2.2" />
     <PackageReference Include="Quartz" Version="3.3.3" />
+    <PackageReference Include="Stanford.NLP.CoreNLP" Version="4.3.2" />
   </ItemGroup>
 
 </Project>

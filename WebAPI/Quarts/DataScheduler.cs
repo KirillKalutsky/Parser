@@ -22,7 +22,7 @@ namespace WebAPI.Quarts
                 .WithIdentity("MailingTrigger", "default")
                 .StartNow()
                 .WithSimpleSchedule(x => x
-                .WithIntervalInMinutes(5)
+                .WithIntervalInMinutes(10)
                 .RepeatForever())
                 .Build();
 

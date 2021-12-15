@@ -2,6 +2,7 @@
 using Parser;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -49,12 +50,30 @@ namespace DBLayer
 
         public async Task AddEventAsync(Event ev)
         {
-            await Events.AddAsync(ev);
+            Debug.Print("Add Event");
+            if(await Events.FindAsync(ev.Link)==null)
+            {
+                await Events.AddAsync(ev);
+            }
         }
 
         public async Task<List<Source>> GetSourcesAsync()
         {
-            return await Sources.Include(x=>x.Fields).Include(x=>x.Events).ToListAsync();
+            return await Sources.Include(source=>source.Fields).Include(source =>source.Events).ToListAsync();
+        }
+
+        public async Task<List<Event>> GetLastEventsByTimeAsync(DateTime minDateTime, DateTime maxDateTime)
+        {
+            return await Events
+                .Where(ev => ev.DateOfDownload >= minDateTime && ev.DateOfDownload <= maxDateTime)
+                .ToListAsync();
+        }
+
+        public async Task<List<Event>> GetEventsByPeriodTimeAsync(DateTime minDateTime)
+        {
+            return await Events
+                .Where(ev => ev.DateOfDownload >= minDateTime)
+                .ToListAsync();
         }
 
     }
