@@ -22,8 +22,6 @@ namespace Parser
         public string Body { get; set; }
         public string Date { get; set; }
         public DateTime DateOfDownload { get; set; }
-
-        [Column(TypeName = "jsonb")]
         public Address Address { get; set; }
 
         [Column(TypeName = "jsonb")]
