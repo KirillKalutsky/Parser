@@ -10,6 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="DeepMorphy" Version="2.0.3" />
     <PackageReference Include="LemmaGenerator" Version="1.1.0" />
     <PackageReference Include="LumenWorksCsvReader" Version="4.0.0" />
     <PackageReference Include="Stanford.NLP.CoreNLP" Version="4.3.2" />

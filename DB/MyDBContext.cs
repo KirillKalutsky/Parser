@@ -17,6 +17,8 @@ namespace DB
         public DbSet<Event> Events { get; set; }
         public DbSet<Source> Sources { get; set; }
         public DbSet<SourceFields> SourceFields { get; set; }
+        public DbSet<District> Districts { get; set; }
+        public DbSet<Address> Addresses { get; set; }
 
         public MyDBContext()
         {
@@ -25,14 +27,22 @@ namespace DB
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Source>().
-                HasOne(x => x.Fields).
-                WithOne(f=>f.Source).
-                HasForeignKey<SourceFields>(x=>x.SourceId);
+            modelBuilder.Entity<Source>()
+                .HasOne(x => x.Fields)
+                .WithOne(f => f.Source)
+                .HasForeignKey<SourceFields>(x => x.SourceId);
 
-            modelBuilder.Entity<Source>().
-                HasMany(s => s.Events).
-                WithOne(e => e.Source);
+            modelBuilder.Entity<Source>()
+                .HasMany(s => s.Events)
+                .WithOne(e => e.Source);
+
+            modelBuilder.Entity<District>()
+                .HasMany(d => d.Addresses)
+                .WithOne(a => a.District);
+
+            modelBuilder.Entity<Event>()
+               .HasOne(ev => ev.Address)
+               .WithMany(adr => adr.Events);
         }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
