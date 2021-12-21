@@ -18,6 +18,10 @@ using System.Data;
 using Parser.CSAnalizator;
 using LemmaSharp;
 using LemmaSharp.Classes;
+using DeepMorphy;
+using Parser.Infrastructure.Python;
+using Microsoft.EntityFrameworkCore;
+using System.Drawing;
 
 namespace DB
 {
@@ -189,52 +193,96 @@ namespace DB
 
         static async Task Main(string[] args)
         {
-            var categories = new Dictionary<string, HashSet<string>>()
-            {
-                {"ДТП" , new HashSet<string>() {"протаранить", "проехать", "наехать", "сбить", "выехать", "вылететь", "столкнуться", "врезаться", "авария" , "автомобиль"}},
-                {"Пожар" , new HashSet<string>() {"сгореть", "загореться" , "огонь", "пламя", "потушить", "воспламяниться", "гореть", "пожар", "вспыхнуть", "взорваться", "возгорание", "задымление", "дым", "газ"}},
-                {"Криминал" , new HashSet<string>() {"украсть", "ограбить", "ударить", "избить", "убить", "убийство", "кража", "труп", "тело" }},
-            };
-            var analizator = new Analizator(categories);
-            var category = analizator.Analize("Саня хуй сосет", "Не ЧП");
 
-            Console.WriteLine(category);
+            var python = new PythonExecutor(@"D:\anaconda\python.exe", @"D:\anaconda\Natasha\newsAnalysis\myScripts\1.py");
 
-            
+            var res = python.ExecuteScript
+                (
+                @"В  нашли труп: возможно, это убийство 
+                    У дома на улице 22 Партсъезда, 4. в Чкаловском районе нашли тело. По словам очевидца, там произошло убийство.
+                    Инцидент случился прошлым вечером, 21 сентября, в 21–22 часа. Местный житель рассказал, что мужчину видели конфликтующим с другим человеком — предполагаемым убийцей.
+                    — Человека с нашего подъезда зарезали. Мне так сказали, — объяснил очевидец. — Того, кто это сделал, уже задержали.
+                    Вероятно, мужчина был местным жителем
+                    На место прибыла полиция
+                    Мы связались со Следственным комитетом, но комментария пока не получили.
+                    Недавно в Полевском женщина воткнула в грудь мужа нож. В ее деле пока разбираются, а вот убийце, изрубившему одногруппницу топором, уже вынесли приговор. Прочитайте также, что известно об убийстве свердловчанки, которой отрезали палец.");
 
-            /*using (var reader = new StreamReader(@"D:\c#\Incidents.csv"))
+            var output = JsonConvert.DeserializeObject<ScriptResponse>(res);
+
+            foreach (var n in output.Names)
+                Console.WriteLine(n);
+
+            foreach (var a in output.Addresses)
+                Console.WriteLine($"{a.Type}: {a.Value}");
+
+
+
+            /* var districts = new List<string>()
+             {
+                 "академический",
+                 "верх-исетский",
+                 "железнодорожный",
+                 "кировский",
+                 "ленинский",
+                 "октябрьский",
+                 "орджоникидзевский",
+                 "чкаловский"
+             };
+             //var morph = new MorphAnalyzer(withLemmatization: true, withTrimAndLower: true);
+
+
+
+             var categories = new Dictionary<string, HashSet<string>>()
+                 {
+                     {"ДТП" , new HashSet<string>() {"протаранить", "проехать", "наехать", "сбить", "выехать", "вылететь", "столкнуться", "врезаться", "авария" , "автомобиль"}},
+                     {"Пожар" , new HashSet<string>() {"сгореть", "загореться" , "огонь", "пламя", "потушить", "воспламяниться", "гореть", "пожар", "вспыхнуть", "взорваться", "возгорание", "задымление", "дым", "газ"}},
+                     {"Криминал" , new HashSet<string>() {"украсть", "ограбить", "ударить", "избить", "убить", "убийство", "кража", "труп", "тело" }},
+                 };
+             var analizator = new Analizator(categories, new MorphAnalyzer(withLemmatization: true, withTrimAndLower: true));
+             var category = await analizator.AnalizeCategoryAsync("Саня сосет бибу", "Не ЧП");
+
+             Console.WriteLine(category);*/
+
+
+
+            /*using (var reader = new StreamReader(@"D:\c#\RedZone\districs\streets_list_with_districts.csv"))
             {
                 List<string> listA = new List<string>();
                 List<string> listB = new List<string>();
+                reader.ReadLine();
                 while (!reader.EndOfStream)
                 {
                     var line = reader.ReadLine();
                     var values = line.Split(';');
-                    Console.WriteLine(line);
 
-                    *//*listA.Add(values[0]);
-                    listB.Add(values[1]);*//*
+                    var streat = values[1];
+                    var district = values[2];
+                    var districtName = district.Split(" ");
+                    if (districtName.Length == 2)
+                        Console.WriteLine(districtName[1].Trim());
+                    else
+                        Console.WriteLine(district.Trim());
+                    listA.Add(streat);
+                    listB.Add(district);
+                    Console.WriteLine(streat.Trim());
                 }
-                Console.WriteLine(listA.Count);
-                Console.WriteLine(listB.Count);
-
             }*/
 
 
-            /*var csvTable = new DataTable();
-            using (var csvReader = new CsvReader(new StreamReader(System.IO.File.OpenRead(@"D:\c#\Incidents.csv")), true))
-            {
-                csvTable.Load(csvReader);
-            }
+            /* var csvTable = new DataTable();
+             using (var csvReader = new CsvReader(new StreamReader(System.IO.File.OpenRead(@"D:\c#\RedZone\districs\streets_list_with_districts.csv")), true))
+             {
+                 csvTable.Load(csvReader);
+             }
 
 
-            for (int i = 0; i < csvTable.Rows.Count; i++)
-            {
-                Console.WriteLine($"{csvTable.Rows[i][0]} ");
-            }
+             for (int i = 0; i < csvTable.Rows.Count; i++)
+             {
+                 Console.WriteLine($"{csvTable.Rows[i][0]} ");
+             }
 
-            Console.WriteLine(csvTable.Rows.Count);
-            Console.WriteLine(csvTable.Columns.Count);*/
+             Console.WriteLine(csvTable.Rows.Count);
+             Console.WriteLine(csvTable.Columns.Count);*/
 
 
             /* var dir = new Dictionary<object, Tuple<Type, Type>>();
