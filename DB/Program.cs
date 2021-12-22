@@ -193,28 +193,20 @@ namespace DB
 
         static async Task Main(string[] args)
         {
+            var dbContext = new MyDBContext();
+            var analyzer = new DistrictAnalyzer(dbContext.Districts, dbContext.Addresses);
 
-            var python = new PythonExecutor(@"D:\anaconda\python.exe", @"D:\anaconda\Natasha\newsAnalysis\myScripts\1.py");
-
-            var res = python.ExecuteScript
-                (
-                @"В  нашли труп: возможно, это убийство 
+            var text = @"В  нашли труп: возможно, это убийство 
                     У дома на улице 22 Партсъезда, 4. в Чкаловском районе нашли тело. По словам очевидца, там произошло убийство.
                     Инцидент случился прошлым вечером, 21 сентября, в 21–22 часа. Местный житель рассказал, что мужчину видели конфликтующим с другим человеком — предполагаемым убийцей.
                     — Человека с нашего подъезда зарезали. Мне так сказали, — объяснил очевидец. — Того, кто это сделал, уже задержали.
                     Вероятно, мужчина был местным жителем
                     На место прибыла полиция
                     Мы связались со Следственным комитетом, но комментария пока не получили.
-                    Недавно в Полевском женщина воткнула в грудь мужа нож. В ее деле пока разбираются, а вот убийце, изрубившему одногруппницу топором, уже вынесли приговор. Прочитайте также, что известно об убийстве свердловчанки, которой отрезали палец.");
+                    Недавно в Полевском женщина воткнула в грудь мужа нож. В ее деле пока разбираются, а вот убийце, изрубившему одногруппницу топором, уже вынесли приговор. Прочитайте также, что известно об убийстве свердловчанки, которой отрезали палец.";
 
-            var output = JsonConvert.DeserializeObject<ScriptResponse>(res);
-
-            foreach (var n in output.Names)
-                Console.WriteLine(n);
-
-            foreach (var a in output.Addresses)
-                Console.WriteLine($"{a.Type}: {a.Value}");
-
+            var distr = analyzer.AnalyzeDistrict(text);
+            Console.WriteLine(distr.DistrictName);
 
 
             /* var districts = new List<string>()

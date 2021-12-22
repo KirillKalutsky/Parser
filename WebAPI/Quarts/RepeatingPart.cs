@@ -15,6 +15,7 @@ namespace WebAPI.Quarts
 {
     public class RepeatingPart : IJob
     {
+        private readonly DistrictAnalyzer districtAnalyzer;
         IHttpClientFactory clientFactory;
         MyDBContext dbContext;
         Crawler crawler;
@@ -60,8 +61,10 @@ namespace WebAPI.Quarts
             this.clientFactory = clientFactory;
             crawler = new Crawler();
             this.dbContext = new MyDBContext();
+            districtAnalyzer = new DistrictAnalyzer(dbContext.Districts, dbContext.Addresses);
+
         }
-        
+
         public async Task Execute(IJobExecutionContext context)
         {
 
@@ -88,12 +91,15 @@ namespace WebAPI.Quarts
                 {*/
                 /*Debug.Print(counter.ToString());
                 Debug.Print(e.Link);*/
+                var distr = districtAnalyzer.AnalyzeDistrict(e.Body);
                 var category = await analizator.AnalizeCategoryAsync(e.Body, defaultCategory);
                 e.IncidentCategory = category;
                 Debug.Print(counter.ToString());
+                e.Address = new Address() { District = distr };
                 counter++;
                 await dbContext.AddEventAsync(e);
                 Debug.Print(e.Link);
+                Debug.Print(e.Address.District.DistrictName);
                 /*   links.Add(e.Link);
                }*/
             }
