@@ -1,5 +1,6 @@
 ﻿using DB;
 using DeepMorphy;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Parser;
 using Parser.CSAnalizator;
@@ -61,7 +62,7 @@ namespace WebAPI.Quarts
             this.clientFactory = clientFactory;
             crawler = new Crawler();
             this.dbContext = new MyDBContext();
-            districtAnalyzer = new DistrictAnalyzer(dbContext.Districts, dbContext.Addresses);
+            districtAnalyzer = new DistrictAnalyzer(dbContext.Districts, dbContext.Addresses.Include(adr=>adr.District));
 
         }
 
@@ -87,21 +88,25 @@ namespace WebAPI.Quarts
 
             await foreach (var e in crawler.StartAsync(sources))
             {
-                /*if (!links.Contains(e.Link))
-                {*/
-                /*Debug.Print(counter.ToString());
-                Debug.Print(e.Link);*/
-                var distr = districtAnalyzer.AnalyzeDistrict(e.Body);
+                Debug.Print(counter.ToString());
+                Debug.Print("Body: "+e.Body);
+
                 var category = await analizator.AnalizeCategoryAsync(e.Body, defaultCategory);
                 e.IncidentCategory = category;
-                Debug.Print(counter.ToString());
-                e.Address = new Address() { District = distr };
+
+                if (category != defaultCategory)
+                {
+                    var distr = await districtAnalyzer.AnalyzeDistrict(e.Body);
+                    e.District = distr;
+                    Debug.Print(e.District.DistrictName);
+                }
+
                 counter++;
                 await dbContext.AddEventAsync(e);
+
                 Debug.Print(e.Link);
-                Debug.Print(e.Address.District.DistrictName);
-                /*   links.Add(e.Link);
-               }*/
+                
+                Debug.Print("\n");
             }
 
             dbContext.SaveChanges();

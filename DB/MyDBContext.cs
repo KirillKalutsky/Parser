@@ -41,8 +41,8 @@ namespace DB
                 .WithOne(a => a.District);
 
             modelBuilder.Entity<Event>()
-               .HasOne(ev => ev.Address)
-               .WithMany(adr => adr.Events);
+               .HasOne(ev => ev.District)
+               .WithMany(d => d.Events);
         }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

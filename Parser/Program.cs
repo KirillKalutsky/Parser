@@ -159,21 +159,9 @@ namespace Parser
             }*/
         };
 
-        private async static void WriteInFile(string path)
-        {
-            using StreamWriter file = new(path, append: true);
-            Regex trimmer = new Regex(@"\s\s+");
-            var crawler = new Crawler();
-            foreach (var s in sources)
-            {
-                await foreach (var e in crawler.StartAsync(new List<Source> { s }))
-                {
-                    await file.WriteLineAsync($"{trimmer.Replace(string.Join(' ', e.Body.Split('\n')), " ")}");
-                }
-            }
-        }
+        
 
-        private static void CheckDistrict()
+       /* private async static void CheckDistrict()
         {
             var counter = 0;
             var hash = new HashSet<string>()
@@ -185,7 +173,7 @@ namespace Parser
 
             foreach (var str in File.ReadLines(pathToFile)) 
             {
-                var result = pythonScript.ExecuteScript(str).ToLower();
+                var result = (await pythonScript.ExecuteScript(str)).ToLower();
                 foreach (var h in hash)
                 {
                     if (result.Contains(h))
@@ -199,7 +187,7 @@ namespace Parser
                 }
             }
             Console.WriteLine(counter);
-        }
+        }*/
 
         static async Task Main(string[] args)
         {

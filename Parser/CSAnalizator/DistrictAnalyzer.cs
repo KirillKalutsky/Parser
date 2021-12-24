@@ -11,32 +11,48 @@ namespace Parser.CSAnalizator
 {
     public class DistrictAnalyzer
     {
-        private HashSet<District> districts;
-        private HashSet<Address> addresses;
+        private Dictionary<string, District> districts;
         private PythonExecutor pythonAnalyzer;
         public DistrictAnalyzer(IEnumerable<District> districts, IEnumerable<Address> addresses)
         {
-            this.districts = districts.ToHashSet();
-            this.addresses = addresses.ToHashSet();
+            this.districts = new Dictionary<string, District>();
+            foreach (var district in districts)
+                this.districts[district.DistrictName] = district;
+            foreach (var adr in addresses)
+                this.districts[adr.AddressName] = adr.District;
             pythonAnalyzer = new PythonExecutor(@"D:\anaconda\python.exe", @"D:\anaconda\Natasha\newsAnalysis\myScripts\1.py");
         }
 
-        public District AnalyzeDistrict(string text)
+        public async Task<District> AnalyzeDistrict(string text)
         {
-            var res = pythonAnalyzer.ExecuteScript(text);
+            var res = await pythonAnalyzer.ExecuteScript(text);
+
             var output = JsonConvert.DeserializeObject<ScriptResponse>(res);
-            foreach (var name in output.Names) 
+
+            if(output==null)
+                return districts["none"];
+
+            if (output.Names != null)
             {
-                var distr = districts.Where(distr => distr.DistrictName == name.ToLower()).FirstOrDefault();
-                if (distr != null)
-                    return distr;
+                foreach (var name in output.Names)
+                {
+                    var nameL = name.ToLower();
+                    if (districts.ContainsKey(nameL))
+                        return districts[nameL];
+                }
             }
-            var address = addresses.Where(adr => adr.AddressName.ToLower().Contains(output.Addresses.FirstOrDefault().Value)).FirstOrDefault();
 
-            if (address != null)
-                return address.District;
+            if (output.Addresses != null)
+            {
+                foreach (var adr in output.Addresses)
+                {
+                    var adrName = adr.Value.ToLower();
+                    if (districts.ContainsKey(adrName))
+                        return districts[adrName];
+                }
+            }
 
-            return districts.Where(d => d.DistrictName == "None").FirstOrDefault();
+            return districts["none"];
         }
     }
 }

@@ -11,11 +11,11 @@ namespace Parser
 {
     public class PageArchitectureSite : CrawlableSource
     {
-        public PageArchitectureSite() 
+        public PageArchitectureSite()
         {
         }
 
-        
+
         public string StartUrl { get; set; }
         public string EndUrl { get; set; }
         public string LinkURL { get; set; }
@@ -27,18 +27,18 @@ namespace Parser
 
         public override async IAsyncEnumerable<Event> CrawlAsync(Source source)
         {
-            IsCrawl = true;
             currentSeanceCrawledEventCount = 0;
             var pageCounter = 1;
             var url = $"{StartUrl}{pageCounter}{EndUrl}";
-            while (IsCrawl)
+            while (!StopCrawl())
             {
                 var page = await PageLoader.LoadPageAsync(url);
                 if (!page.Item1.IsSuccessStatusCode)
                     yield break;
 
-                var links = await PageLoader.GetPageElementAsync(url, LinkElement);
-                var pages = links.Select(x => PageLoader.LoadPageAsync($"{LinkURL}{x}")).ToList();
+                var pages = (await PageLoader.GetPageElementAsync(url, LinkElement))
+                    .Select(x => PageLoader.LoadPageAsync($"{LinkURL}{x}")).ToList();
+
                 while (pages.Any())
                 {
                     var tP = await Task.WhenAny(pages);
@@ -49,29 +49,27 @@ namespace Parser
                     document.LoadHtml(await p.Item1.Content.ReadAsStringAsync());
 
                     var news = NewsParser.ParseHtmlPage(document, ParseEventProperties);
-                    
+
                     news.Link = p.Item2;
                     news.DateOfDownload = DateTime.Now;
                     news.Source = source;
                     currentEventLink = page.Item2;
-                    currentSeanceCrawledEventCount += 1;
-
-                    IsCrawl = StopCrawl();
+                    currentSeanceCrawledEventCount+=1;
 
                     yield return news;
                 }
 
-                pageCounter += 1;
+                pageCounter+=1;
                 url = $"{StartUrl}{pageCounter}{EndUrl}";
             }
         }
 
         public override bool StopCrawl()
         {
-            if (LastEvent != null)
-                return LastEvent.Link.Equals(currentEventLink);
+           // if (LastEvent != null)
+             //   return !LastEvent.Link.Equals(currentEventLink);
 
-            return currentSeanceCrawledEventCount < 100;
+            return currentSeanceCrawledEventCount > 1;
         }
     }
 }

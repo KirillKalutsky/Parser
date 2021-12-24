@@ -30,29 +30,33 @@ namespace Parser.Python
             return Encoding.UTF8.GetString(base64EncodedBytes);
         }
 
-        public  string ExecuteScript(string argument)
+        public Task<string> ExecuteScript(string argument)
         {
-
-            var input = EncodeTo64(argument);
-
-            ProcessStartInfo start = new ProcessStartInfo();
-            start.FileName = pathToInterpritator;
-            start.Arguments = $"{pathToScript} {input}";
-            start.UseShellExecute = false;
-            start.RedirectStandardOutput = true;
-            string result;
-            using (Process process = Process.Start(start))
+            return Task.Run(() =>
             {
-                using (StreamReader reader = process.StandardOutput)
+                var input = EncodeTo64(argument);
+
+                ProcessStartInfo start = new ProcessStartInfo();
+                start.FileName = pathToInterpritator;
+                start.Arguments = $"{pathToScript} {input}";
+                start.UseShellExecute = false;
+                start.RedirectStandardOutput = true;
+                string result;
+                using (Process process = Process.Start(start))
                 {
-                    result = reader.ReadToEnd();
+                    using (StreamReader reader = process.StandardOutput)
+                    {
+                        result = reader.ReadToEnd();
+                    }
                 }
-            }
 
-            result = result.Substring(2, result.Length - 5);
-            result = DecodeFrom64(result);
+                if (result == string.Empty)
+                    return result;
+                result = result.Substring(2, result.Length - 5);
+                result = DecodeFrom64(result);
 
-            return result;
+                return result;
+            });
         }
     }
 }

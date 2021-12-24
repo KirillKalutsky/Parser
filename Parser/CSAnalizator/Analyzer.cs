@@ -50,12 +50,12 @@ namespace Parser.CSAnalizator
             });
         }
 
-        private List<string> SplitTextToTokens(string text)
+        private IEnumerable<string> SplitTextToTokens(string text)
         {
             var tokens = text.ToLower()
                 .Split(new char[] {',','.',' ','\'','\"','\t','\n','?','!' })
                 .Where(token=>!(string.IsNullOrEmpty(token) || string.IsNullOrWhiteSpace(token)));
-            return tokens.ToList();
+            return tokens;
         }
     }
 }

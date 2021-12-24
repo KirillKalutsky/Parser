@@ -1,4 +1,5 @@
 ﻿using HtmlAgilityPack;
+using Parser.Infrastructure.ProcessText;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -30,7 +31,7 @@ namespace Parser
                 else
                     Debug.Print($"dont containt {e.Key} {e.Value}");
                 
-                p.SetValue(result, value.ToString());
+                p.SetValue(result, value.ToString().ReplaceHtmlTags(string.Empty));
             }
             return result;
         }

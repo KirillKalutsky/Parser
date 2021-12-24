@@ -12,8 +12,35 @@ namespace Parser
 {
     public class Crawler
     {
-        public Crawler()
+        public async IAsyncEnumerable<Event> StartAsync(IEnumerable<Source> sourcers)
         {
+            var sourceEnumerators = GetCrawbleSourceEnumerator(sourcers).ToList();
+
+            while (sourceEnumerators.Any())
+            {
+                
+                foreach (var en in sourceEnumerators)
+                {
+                    var next = await en.MoveNextAsync().AsTask();
+                    if (next)
+                        yield return en.Current;
+                    else
+                        sourceEnumerators.Remove(en);
+                }
+            }
+        }
+        IEnumerable<IAsyncEnumerator<Event>> GetCrawbleSourceEnumerator(IEnumerable<Source> sourcers)
+        {
+            var fromCrawbleSourceToEnumerator = new LinkedList<IAsyncEnumerator<Event>>();
+
+            foreach (var s in sourcers)
+            {
+                var source = GetCrawlableSourceFromSource(s);
+                var enumerator = source.CrawlAsync(s).GetAsyncEnumerator();
+                fromCrawbleSourceToEnumerator.AddLast(enumerator);
+            }
+
+            return fromCrawbleSourceToEnumerator;
         }
 
         private CrawlableSource GetCrawlableSourceFromSource(Source s)
@@ -23,85 +50,18 @@ namespace Parser
             {
                 case SourceType.PageSite:
                     var pageSite = JsonConvert.DeserializeObject<PageArchitectureSite>(s.Fields.Properties);
-                    if(s.Events!=null)
+                    if (s.Events != null)
                         pageSite.LastEvent = s.Events.OrderBy(x => x.DateOfDownload).LastOrDefault();
                     crawbleSource = pageSite;
                     break;
                 default:
                     var site = JsonConvert.DeserializeObject<PageArchitectureSite>(s.Fields.Properties);
-                    site.LastEvent = s.Events.OrderBy(x => x.DateOfDownload).LastOrDefault();
+                    if (s.Events != null)
+                        site.LastEvent = s.Events.OrderBy(x => x.DateOfDownload).LastOrDefault();
                     crawbleSource = site;
                     break;
             }
             return crawbleSource;
-        }
-
-        Tuple<List<CrawlableSource>,Dictionary<IAsyncEnumerator<Event>, CrawlableSource>> GetCrawbleSourceEnumerator(List<Source> sourcers)
-        {
-            var fromCrawbleSourceToEnumerator = new Dictionary<IAsyncEnumerator<Event>, CrawlableSource>();
-            var listSources = new List<CrawlableSource>();
-
-            sourcers.ForEach(s => 
-            {
-                var source = GetCrawlableSourceFromSource(s);
-                listSources.Add(source);
-                var enumerator = source.CrawlAsync(s).GetAsyncEnumerator();
-                fromCrawbleSourceToEnumerator[enumerator] = source;
-            });
-
-            return Tuple.Create(listSources,fromCrawbleSourceToEnumerator);
-        }
-
-        public async IAsyncEnumerable<Event> StartAsync(IEnumerable<Source> sourcers)
-        {
-            var s = GetCrawbleSourceEnumerator(sourcers.ToList());
-            var sourceEnumerators = s.Item2;
-
-            var dictionary = new Dictionary<Task<bool>, IAsyncEnumerator<Event>>();
-
-
-            while (sourceEnumerators.Any())
-            {
-                foreach (var en in sourceEnumerators.Keys)
-                {
-                    var next = en.MoveNextAsync().AsTask();
-                    var flag = await next;
-                    if (flag)
-                    {
-                        var news = en.Current;
-                        yield return news;
-                    }
-                    else
-                    {
-                        sourceEnumerators.Remove(en);
-                    }
-                    //dictionary[next] = en;
-                    //dictionary.Add(next,en);
-                }
-                /*while (dictionary.Any())
-                {
-                    var cur = await Task.WhenAny(dictionary.Keys);
-                    IAsyncEnumerator<Event> enumer = dictionary[cur];
-
-                    var resCur = await cur;
-                   
-                    if (resCur)
-                    {
-                        var news = enumer.Current;
-                        yield return news;
-                    }
-                    else
-                    {
-                        sourceEnumerators.Remove(enumer);
-                    }
-
-                    dictionary.Remove(cur);
-
-                }*/
-            }
-
-            foreach (var sour in s.Item1)
-                Console.WriteLine($"{sour.IsCrawl}");
         }
     }
 }
