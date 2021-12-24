@@ -10,19 +10,27 @@ namespace Parser
 {
     public class Event
     {
-        public Event()
-        {
-
-        }
         [Key]
         public string Link { get; set; }
         public Source Source { get; set; }
         public string Title { get; set; }
         public string IncidentCategory {get;set;}
-        public string Body { get; set; }
+        private string body;
+        public string Body 
+        {
+            get { return body; }
+            set
+            {
+                if (value.Length > 1000)
+                    body = value.Substring(0, 1000);
+                else
+                    body = value;
+            }
+
+        }
         public string Date { get; set; }
         public DateTime DateOfDownload { get; set; }
-        public Address Address { get; set; }
+        public District District{ get; set; }
 
         [Column(TypeName = "jsonb")]
         public HashSet<string> Hash { get; }

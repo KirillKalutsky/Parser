@@ -16,6 +16,5 @@ namespace Parser
         public int Id { get; set; }
         public string AddressName { get; set; }
         public District District { get; set; }
-        public List<Event> Events { get; set; }
     }
 }

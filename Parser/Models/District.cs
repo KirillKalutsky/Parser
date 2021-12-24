@@ -23,5 +23,7 @@ namespace Parser
         [Key]
         public string DistrictName  { get; set; }
         public List<Address> Addresses { get; set; }
+        public List<Event> Events { get; set; }
+
     }
 }
