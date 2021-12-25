@@ -109,8 +109,9 @@ namespace WebAPI.Quarts
                 Debug.Print("\n");
             }
 
+            Debug.Print("Start Save Changes");
             dbContext.SaveChanges();
-            
+            Debug.Print("Finish Save Changes");
 
             Console.Write(DateTime.Now - startTime);
             Debug.Print((DateTime.Now - startTime).ToString());

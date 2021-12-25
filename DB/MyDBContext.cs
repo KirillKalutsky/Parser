@@ -65,6 +65,7 @@ namespace DB
             {
                 await Events.AddAsync(ev);
             }
+            Debug.Print("Succes Add Event");
         }
 
         public async Task<List<Source>> GetSourcesAsync()

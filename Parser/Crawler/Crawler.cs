@@ -14,18 +14,24 @@ namespace Parser
     {
         public async IAsyncEnumerable<Event> StartAsync(IEnumerable<Source> sourcers)
         {
-            var sourceEnumerators = GetCrawbleSourceEnumerator(sourcers).ToList();
+            var sourceEnumerators = GetCrawbleSourceEnumerator(sourcers).ToDictionary(x=>x,y=>1);
 
             while (sourceEnumerators.Any())
             {
                 
-                foreach (var en in sourceEnumerators)
+                foreach (var en in sourceEnumerators.Keys)
                 {
                     var next = await en.MoveNextAsync().AsTask();
                     if (next)
+                    {
                         yield return en.Current;
+                    }
                     else
+                    {
+                        Debug.Print("Попытка удаления источника из списка");
                         sourceEnumerators.Remove(en);
+                        Debug.Print("Успешное удаление источника из списка");
+                    }
                 }
             }
         }

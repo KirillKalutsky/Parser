@@ -66,8 +66,8 @@ namespace Parser
 
         public override bool StopCrawl()
         {
-           // if (LastEvent != null)
-             //   return !LastEvent.Link.Equals(currentEventLink);
+            if (LastEvent != null)
+                return LastEvent.Link.Equals(currentEventLink);
 
             return currentSeanceCrawledEventCount > 1;
         }
