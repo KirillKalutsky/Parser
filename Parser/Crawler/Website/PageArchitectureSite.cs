@@ -11,17 +11,13 @@ namespace Parser
 {
     public class PageArchitectureSite : CrawlableSource
     {
-        public PageArchitectureSite()
-        {
-        }
-
-
         public string StartUrl { get; set; }
         public string EndUrl { get; set; }
         public string LinkURL { get; set; }
         public HtmlElement LinkElement { get; set; }
         public Dictionary<string, string> ParseEventProperties { get; set; }
 
+        private bool isRun = true;
         string currentEventLink;
         int currentSeanceCrawledEventCount;
 
@@ -30,7 +26,7 @@ namespace Parser
             currentSeanceCrawledEventCount = 0;
             var pageCounter = 1;
             var url = $"{StartUrl}{pageCounter}{EndUrl}";
-            while (!StopCrawl())
+            while (isRun)
             {
                 var page = await PageLoader.LoadPageAsync(url);
                 if (!page.Item1.IsSuccessStatusCode)
@@ -55,7 +51,7 @@ namespace Parser
                     news.Source = source;
                     currentEventLink = page.Item2;
                     currentSeanceCrawledEventCount+=1;
-
+                    isRun = StopCrawl();
                     yield return news;
                 }
 
@@ -67,9 +63,9 @@ namespace Parser
         public override bool StopCrawl()
         {
             if (LastEvent != null)
-                return LastEvent.Link.Equals(currentEventLink);
+                return !LastEvent.Link.Equals(currentEventLink);
 
-            return currentSeanceCrawledEventCount > 1;
+            return currentSeanceCrawledEventCount < 1;
         }
     }
 }
