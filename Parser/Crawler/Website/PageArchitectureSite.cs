@@ -23,6 +23,7 @@ namespace Parser
 
         public override async IAsyncEnumerable<Event> CrawlAsync(Source source)
         {
+            isRun = true;
             currentSeanceCrawledEventCount = 0;
             var pageCounter = 1;
             var url = $"{StartUrl}{pageCounter}{EndUrl}";
@@ -63,9 +64,9 @@ namespace Parser
         public override bool StopCrawl()
         {
             if (LastEvent != null)
-                return !LastEvent.Link.Equals(currentEventLink);
+                return LastEvent.Link.Equals(currentEventLink);
 
-            return currentSeanceCrawledEventCount < 1;
+            return currentSeanceCrawledEventCount < 1000;
         }
     }
 }

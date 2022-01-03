@@ -13,15 +13,19 @@ namespace Parser.CSAnalizator
     {
         private Dictionary<string, HashSet<string>> categories;
         private readonly Lemmatizer lemmatizer;
-        public Analyzer(Dictionary<string, HashSet<string>> categories, MorphAnalyzer morphAnalyzer)
+        private readonly string defaultCategory;
+        private readonly char[] splitSymbols = new char[] { ',', '.', ' ', '\'', '\"', '\t', '\n', '?', '!' };
+        public Analyzer(Dictionary<string, HashSet<string>> categories, string defaultCategory)
         {
+            this.defaultCategory = defaultCategory;
             this.categories = categories;
             var dataFilepath = @"D:\c#\RedZone\full7z-mlteast-ru.lem";
             FileStream stream = File.OpenRead(dataFilepath);
             lemmatizer = new Lemmatizer(stream);
+            stream.Close();
         }
 
-        public Task<string> AnalizeCategoryAsync(string text, string defaultCategory)
+        public Task<string> AnalizeCategoryAsync(string text)
         {
             return Task.Run(() =>
             {
@@ -52,10 +56,9 @@ namespace Parser.CSAnalizator
 
         private IEnumerable<string> SplitTextToTokens(string text)
         {
-            var tokens = text.ToLower()
-                .Split(new char[] {',','.',' ','\'','\"','\t','\n','?','!' })
+            return text.ToLower()
+                .Split(splitSymbols)
                 .Where(token=>!(string.IsNullOrEmpty(token) || string.IsNullOrWhiteSpace(token)));
-            return tokens;
         }
     }
 }

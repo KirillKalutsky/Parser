@@ -1,4 +1,5 @@
 using DB;
+using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -40,6 +41,7 @@ namespace WebAPI
             });*/
             services.AddTransient<JobFactory>();
             services.AddScoped<RepeatingPart>();
+            TelemetryConfiguration.Active.DisableTelemetry = true;
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

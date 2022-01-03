@@ -55,9 +55,17 @@ namespace DB
         }
         public async Task<List<Event>> GetAllEventsAsync()
         {
-            return await Events.ToListAsync();
+            return await Events.Include(ev => ev.District).ToListAsync();
         }
 
+        public async Task<District> GetDistrictByNameAsync(string name)
+        {
+            var district = await Districts
+                .Include(distr => distr.Events)
+                .Where(distr => distr.DistrictName == name)
+                .FirstOrDefaultAsync();
+            return district;
+        }
         public async Task AddEventAsync(Event ev)
         {
             Debug.Print("Add Event");
@@ -84,6 +92,13 @@ namespace DB
         {
             return await Events
                 .Where(ev => ev.DateOfDownload >= minDateTime)
+                .ToListAsync();
+        }
+
+        public async Task<List<Event>> GetEventsByDistrictLocation(string districtName)
+        {
+            return await Events
+                .Where(ev => ev.District.DistrictName == districtName)
                 .ToListAsync();
         }
 

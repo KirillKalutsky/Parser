@@ -195,23 +195,6 @@ namespace DB
         static async Task Main(string[] args)
         {
 
-            var a = new Dictionary<int,int>() { { 1,1 },{ 2, 2}};
-            foreach(var e in a.Keys)
-            {
-                if (e % 2 == 0)
-                    a.Remove(e);
-            }
-            /* var dbContext = new MyDBContext();
-             var analyzer = new DistrictAnalyzer(dbContext.Districts, dbContext.Addresses.Include(adr=>adr.District));
-
-             foreach (var d in dbContext.Districts)
-                 Console.WriteLine(d.DistrictName);
-
-             var text = @"\r\n\t\t\t\t\t\t\tВ Свердловской области придется сжечь партии краснодарских семян моркови и укропа и партию семян кориандра из Московской области.Специалисты Свердловского референтного центра Россельхознадзора изучили образцы расфасованных в пакеты семян овощных культур, которые направило на испытания свердловское Управление Россельхознадзора.В исследованных образах были выявлены семена карантинных сорных растений.Семена сорняка Ambrosia artemisiifolia(амброзия полыннолистная) были обнаружены в образцах с семенами моркови сортов «Витаминная 6», «Лосиноостровская - 13», «Деликатесная» и «Нантская - 4», а также в семенах укропа сорта «Обильнолистный». Эти семена прибыли из Краснодарского края.В семенах кориандра сорта «Прелесть», привезенных из Московской области, были обнаружены семена карантинного сорняка повилики рода Cuscuta L.\r\n\t\t\t\t\t\t\tПолучать доступ к эксклюзивным и не только новостям «Вечерних ведомостей» быстрее можно, подписавшись на нас в сервисах «Яндекс.Новости» и «Google Новости».\r\n\t\t\t\t\t\t\tА получать информацию оперативнее всего и в более непринуждённой форме можно в нашем телеграм-канале.Там свежо, дерзко и есть много того, что мы не публикуем на сайте!Подписывайтесь!\r\n\t\t\t\t\t\t\tЕлизавета Свердлова &copy; &nbsp; Вечерние & nbsp; ведомости\r\n\t\t\t\t\t\t\t\r\n\t\t\t\t\t\t\t\r\n\r\n\t\t\t\t\t\t\t\r\n\t\t\t\t\t\t\t";
-
-
-             var distr = analyzer.AnalyzeDistrict(text);
-             Console.WriteLine(distr.DistrictName);*/
 
 
             /* var districts = new List<string>()
@@ -241,8 +224,21 @@ namespace DB
              Console.WriteLine(category);*/
 
 
+            var dataFilepath = @"D:\c#\RedZone\full7z-mlteast-ru.lem";
+            FileStream stream = File.OpenRead(dataFilepath);
+            var lemmatizer = new Lemmatizer(stream);
 
-            /*using (var reader = new StreamReader(@"D:\c#\RedZone\districs\streets_list_with_districts.csv"))
+            var words = @"авария сетях прорыв сети магистральные трубопровод водоснабжение водоснабжения холодное ХВС горячее ГВС вода коммунальная затопление затопления затоплению теплоснабжение теплоснабжения отключение теплоснабжение ремонтные отопление отключено отопление отопления трубопровод водоснабжения трубы разрыв водовод водоснабжение отключена перекрыть перекрытие электроснабжение электроснабжения электричество электричества кабельные повредили повреждение свет электроснабжения электричество нарушение нарушено воздушной электричества пропало распределительная сеть распределительной подземный кабельно-воздушная линии электросетевой комплекс"; 
+
+            var ws = words.Split(" ");
+
+            var hash = new HashSet<string>();
+            foreach (var w in ws)
+                hash.Add(lemmatizer.Lemmatize(w));
+
+            foreach (var w in hash)
+                Console.WriteLine(w);
+            /*using (var reader = new StreamReader(@"D:\c#\RedZone\CH.csv"))
             {
                 List<string> listA = new List<string>();
                 List<string> listB = new List<string>();
@@ -252,16 +248,9 @@ namespace DB
                     var line = reader.ReadLine();
                     var values = line.Split(';');
 
-                    var streat = values[1];
-                    var district = values[2];
-                    var districtName = district.Split(" ");
-                    if (districtName.Length == 2)
-                        Console.WriteLine(districtName[1].Trim());
-                    else
-                        Console.WriteLine(district.Trim());
-                    listA.Add(streat);
-                    listB.Add(district);
-                    Console.WriteLine(streat.Trim());
+                    foreach (var val in values)
+                        Console.Write($"{val} ");
+                    Console.WriteLine();
                 }
             }*/
 

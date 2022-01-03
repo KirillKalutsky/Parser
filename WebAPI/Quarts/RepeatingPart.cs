@@ -22,43 +22,10 @@ namespace WebAPI.Quarts
         Crawler crawler;
         Analyzer analizator;
         private readonly string defaultCategory = "Не ЧП";
-        Dictionary<string, HashSet<string>> categories = new Dictionary<string, HashSet<string>>()
-            {
-                {"ДТП" , new HashSet<string>() 
-                {
-                    "водитель", "пассажир", "протаранить", "пассажирка", "пешеход", "автомобиль", "иномарка",
-                    "мотоцикл", "грузовик", "пролететь", "проехать", "наехать", "сбить", "выехать", "вылететь", 
-                    "столкнуться", "врезаться", "авария" , "автомобиль", "промчаться", "двигаться", "обогнать", 
-                    "обгон"
-                }},
-                {"Пожар" , new HashSet<string>() 
-                {
-                    "сгореть", "загореться" , "огонь", "пламя", "потушить", "воспламяниться", "гореть", 
-                    "пожар", "вспыхнуть", "взорваться", "возгорание", "задымление", "дым", "газ"
-                }},
-                {"Физическое насилие" , new HashSet<string>()
-                {
-                    "убийца", "убитый", "убитая", "убитые", "труп", "тело", "убийство", "вооружиться", "вооружился",
-                    "вооружилась", "нож", "ранение", "раны", "рана", "зарезать", "скончаться", "удар", "ударить",
-                    "конфликт", "ссора", "поссориться", "нападавший", "жестокость", "нападавшая","нападать", 
-                    "огнестрельное", "оружие", "выстрел", "стрельба", "задушить", "удушье", "удушение", "изрубить",
-                    "кровь", "кровотечение", "мучить", "пытки", "пытать", "смертельный", "травмы", "сжёг", "насильственная",
-                    "расправиться", "развратные", "изнасилование", "изнасиловать", "сексуальное",  "насилие", "драка", 
-                    "рукоприкладство", "избиение", "жертва", "избивать", "бить", "пинать", "побои"
-                }},
-                {"Кражи" , new HashSet<string>()
-                {
-                    "украсть", "ограбить", "кража", "грабитель", "вор", "хищение", "ограбление", "обокрасть", "похитить",
-                    "взлом", "ценности"
-                }},
-                {"Суицид" , new HashSet<string>() 
-                {
-                    "покончить", "суицид", "падение", "упасть", "самоубийство", "сброситься", "повеситься", "застрелиться" 
-                }},
-            };
+        
         public RepeatingPart(IHttpClientFactory clientFactory/* IDBContext dbContext*/) 
         {
-            analizator = new Analyzer(categories, new MorphAnalyzer(withLemmatization: true, withTrimAndLower: true));
+            analizator = new Analyzer(Emergency.Categories, defaultCategory);
             this.clientFactory = clientFactory;
             crawler = new Crawler();
             this.dbContext = new MyDBContext();
@@ -84,14 +51,12 @@ namespace WebAPI.Quarts
                     Debug.Print(e.Link);
             }
 
-           
-
             await foreach (var e in crawler.StartAsync(sources))
             {
                 Debug.Print(counter.ToString());
-                Debug.Print("Body: "+e.Body);
+                Debug.Print("Body: " + e.Body);
 
-                var category = await analizator.AnalizeCategoryAsync(e.Body, defaultCategory);
+                var category = await analizator.AnalizeCategoryAsync(e.Body);
                 e.IncidentCategory = category;
 
                 if (category != defaultCategory)
@@ -104,8 +69,10 @@ namespace WebAPI.Quarts
                 counter++;
                 await dbContext.AddEventAsync(e);
 
+                if(counter%100 == 0)
+                    dbContext.SaveChanges();
                 Debug.Print(e.Link);
-                
+                Debug.Print(e.IncidentCategory);
                 Debug.Print("\n");
             }
 

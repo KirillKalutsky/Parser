@@ -25,8 +25,13 @@ namespace WebAPI.Controllers
         [HttpGet("All")]
         public async Task<string> GetEvents()
         {
+            JsonSerializerSettings settings = new JsonSerializerSettings
+            {
+                PreserveReferencesHandling = PreserveReferencesHandling.Objects
+            };
             var allEvents = await db.GetAllEventsAsync();
-            return JsonConvert.SerializeObject(allEvents);
+
+            return JsonConvert.SerializeObject(allEvents, settings);
         }
 
         [HttpGet("ByTime")]
