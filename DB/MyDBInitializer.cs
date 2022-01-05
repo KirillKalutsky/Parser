@@ -191,7 +191,8 @@ namespace DB
             var addresses = new List<Address>();
             var districts = new List<District>();
             //Инициализация списка адресов и районов
-            using (var reader = new StreamReader(@"..\..\..\..\DB\streets_list_with_districts.csv"))
+            Debug.Print(Path.GetFullPath(@"..\DB\streets_list_with_districts.csv"));
+            using (var reader = new StreamReader(@"..\DB\streets_list_with_districts.csv"))
             {
                 reader.ReadLine();
                 while (!reader.EndOfStream)

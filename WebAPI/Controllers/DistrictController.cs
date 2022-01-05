@@ -40,7 +40,7 @@ namespace WebAPI.Controllers
             {
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
             };
-            var events = (await db.GetDistrictByNameAsync(districtName)).Events;
+            var events = (await db.GetDistrictByNameAsync(districtName))?.Events;
 
             if(lastEventDownloadTime == null)
                 return JsonConvert.SerializeObject(events, settings);

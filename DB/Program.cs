@@ -223,7 +223,8 @@ namespace DB
 
              Console.WriteLine(category);*/
 
-            var dataFilepath = @"..\..\..\..\DB\streets_list_with_districts.csv";
+            var dataFilepath = @"..\..\..\..\Parser\CSAnalizator\streets_list_with_districts.csv";
+            Console.WriteLine(Path.GetFullPath(dataFilepath));
             FileStream stream = File.OpenRead(dataFilepath);
             var lemmatizer = new Lemmatizer(stream);
 

@@ -2,6 +2,7 @@
 using LemmaSharp.Classes;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -19,7 +20,8 @@ namespace Parser.CSAnalizator
         {
             this.defaultCategory = defaultCategory;
             this.categories = categories;
-            var dataFilepath = @"..\..\..\..\Parser\CSAnalizator\full7z-mlteast-ru.lem";
+            var dataFilepath = @"..\Parser\CSAnalizator\full7z-mlteast-ru.lem";
+            Debug.Print(Path.GetFullPath(dataFilepath));
             FileStream stream = File.OpenRead(dataFilepath);
             lemmatizer = new Lemmatizer(stream);
             stream.Close();

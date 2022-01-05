@@ -20,7 +20,7 @@ namespace Parser.CSAnalizator
                 this.districts[district.DistrictName] = district;
             foreach (var adr in addresses)
                 this.districts[adr.AddressName] = adr.District;
-            pythonAnalyzer = new PythonExecutor(@"D:\anaconda\python.exe", @"D:\anaconda\Natasha\newsAnalysis\myScripts\1.py");
+            pythonAnalyzer = new PythonExecutor(@"D:\anaconda\python.exe", @"..\Parser\CSAnalizator\1.py");
         }
 
         public async Task<District> AnalyzeDistrict(string text)
