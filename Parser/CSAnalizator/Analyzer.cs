@@ -19,7 +19,7 @@ namespace Parser.CSAnalizator
         {
             this.defaultCategory = defaultCategory;
             this.categories = categories;
-            var dataFilepath = @"D:\c#\RedZone\full7z-mlteast-ru.lem";
+            var dataFilepath = @"..\..\..\..\Parser\CSAnalizator\full7z-mlteast-ru.lem";
             FileStream stream = File.OpenRead(dataFilepath);
             lemmatizer = new Lemmatizer(stream);
             stream.Close();

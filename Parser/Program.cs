@@ -1,4 +1,5 @@
 ﻿using HtmlAgilityPack;
+using LemmaSharp.Classes;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -191,6 +192,22 @@ namespace Parser
 
         static async Task Main(string[] args)
         {
+
+            var dataFilepath = @"..\..\..\..\Parser\CSAnalizator\full7z-mlteast-ru.lem";
+            FileStream stream = File.OpenRead(dataFilepath);
+            var lemmatizer = new Lemmatizer(stream);
+
+            var words = @"авария сетях прорыв сети магистральные трубопровод водоснабжение водоснабжения холодное ХВС горячее ГВС вода коммунальная затопление затопления затоплению теплоснабжение теплоснабжения отключение теплоснабжение ремонтные отопление отключено отопление отопления трубопровод водоснабжения трубы разрыв водовод водоснабжение отключена перекрыть перекрытие электроснабжение электроснабжения электричество электричества кабельные повредили повреждение свет электроснабжения электричество нарушение нарушено воздушной электричества пропало распределительная сеть распределительной подземный кабельно-воздушная линии электросетевой комплекс";
+
+            var ws = words.Split(" ");
+
+            var hash = new HashSet<string>();
+            foreach (var w in ws)
+                hash.Add(lemmatizer.Lemmatize(w));
+
+            foreach (var w in hash)
+                Console.WriteLine(w);
+
             /*var counter = 1;
             var crawler = new Crawler();
             var dictionary = new Dictionary<Source,int>();
