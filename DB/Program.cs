@@ -223,7 +223,7 @@ namespace DB
 
              Console.WriteLine(category);*/
 
-            var dataFilepath = @"..\..\..\..\Parser\CSAnalizator\full7z-mlteast-ru.lem";
+            var dataFilepath = @"..\..\..\..\DB\streets_list_with_districts.csv";
             FileStream stream = File.OpenRead(dataFilepath);
             var lemmatizer = new Lemmatizer(stream);
 
